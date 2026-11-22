@@ -860,7 +860,6 @@ code {
 .footer {
   margin-top: 84px;
   padding-top: 28px;
-  border-top: 1px solid var(--border);
   display: flex;
   justify-content: space-between;
   align-items: center;
