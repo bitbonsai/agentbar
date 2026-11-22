@@ -1,0 +1,5 @@
+dist/
+macos/.build/
+collector/agentbar-collector
+agentbar-collector
+.DS_Store
