@@ -85,11 +85,12 @@ struct ContentView: View {
 
     private var header: some View {
         HStack(alignment: .top, spacing: 9) {
+            // The robot fills only the middle of its square artwork; lift it so it centres on the title's capitals.
             icon
-                .padding(.top, 1)
+                .offset(y: -1)
             VStack(alignment: .leading, spacing: 1) {
                 Text("Agents")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(palette.text)
                 Text(subtitle)
                     .font(.system(size: 10))
