@@ -312,8 +312,12 @@
         <li><strong>SQLite history.</strong> Every refresh appends to <code>~/Library/Application Support/agentbar/history.db</code> so you can query your own usage.</li>
       </ul>
       <div class="code-box">
-        <pre><code id="sqlSnippet">sqlite3 "$HOME/Library/Application Support/agentbar/history.db" \
-  "SELECT recorded_at, provider_id, window_id, round(remaining_pct, 1) FROM quota_samples ORDER BY id DESC LIMIT 10;"</code></pre>
+        <pre><code id="sqlSnippet"><span class="syn-fn">sqlite3</span> <span class="syn-str">"$HOME/Library/Application Support/agentbar/history.db"</span> "
+  <span class="syn-kw">SELECT</span> recorded_at, provider_id, window_id,
+         <span class="syn-fn">round</span>(remaining_pct, <span class="syn-num">1</span>) <span class="syn-kw">AS</span> remaining_pct
+  <span class="syn-kw">FROM</span> quota_samples
+  <span class="syn-kw">ORDER BY</span> id <span class="syn-kw">DESC</span>
+  <span class="syn-kw">LIMIT</span> <span class="syn-num">10</span>;"</code></pre>
         <button type="button" class="copy-btn" data-copy="#sqlSnippet">Copy</button>
       </div>
     </section>

@@ -31,6 +31,10 @@
 
   --btn-bg: #2563eb;
   --btn-fg: #ffffff;
+  --syn-kw: #7c3aed;
+  --syn-str: #15803d;
+  --syn-fn: #2563eb;
+  --syn-num: #b45309;
   --pill-active-bg: rgba(20, 24, 32, 0.10);
   --pill-active-fg: #141820;
 }
@@ -68,6 +72,10 @@
 
     --btn-bg: #3b82f6;
     --btn-fg: #ffffff;
+    --syn-kw: #c4b5fd;
+    --syn-str: #86efac;
+    --syn-fn: #93c5fd;
+    --syn-num: #fcd34d;
     --pill-active-bg: rgba(255, 255, 255, 0.14);
     --pill-active-fg: #eef2f7;
   }
@@ -104,6 +112,10 @@
 
   --btn-bg: #cba6f7;
   --btn-fg: #11111b;
+  --syn-kw: #cba6f7;
+  --syn-str: #a6e3a1;
+  --syn-fn: #89b4fa;
+  --syn-num: #fab387;
   --pill-active-bg: rgba(203, 166, 247, 0.22);
   --pill-active-fg: #cdd6f4;
 }
@@ -139,6 +151,10 @@
 
   --btn-bg: #1e66f5;
   --btn-fg: #ffffff;
+  --syn-kw: #8839ef;
+  --syn-str: #40a02b;
+  --syn-fn: #1e66f5;
+  --syn-num: #fe640b;
   --pill-active-bg: rgba(30, 102, 245, 0.14);
   --pill-active-fg: #4c4f69;
 }
@@ -809,6 +825,11 @@ code {
   padding: 15px 68px 15px 16px;
   overflow-x: auto;
 }
+
+.syn-kw { color: var(--syn-kw); }
+.syn-str { color: var(--syn-str); }
+.syn-fn { color: var(--syn-fn); }
+.syn-num { color: var(--syn-num); }
 
 .code-box pre {
   margin: 0;
