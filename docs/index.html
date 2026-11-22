@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>AgentBar · Live AI quota HUD for macOS</title>
+  <meta name="description" content="A native macOS HUD for Antigravity, OpenCode Go, Codex, and Claude Code. Press ⌥⇧A anywhere.">
+  <link rel="canonical" href="https://agentbar.fyi/">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="AgentBar · Live AI quota HUD for macOS">
+  <meta property="og:description" content="A native macOS HUD for Antigravity, OpenCode Go, Codex, and Claude Code. Press ⌥⇧A anywhere.">
+  <meta property="og:url" content="https://agentbar.fyi/">
+  <meta property="og:image" content="https://agentbar.fyi/agentbar-hud-glass.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AgentBar · Live AI quota HUD for macOS">
+  <meta name="twitter:description" content="A native macOS HUD for Antigravity, OpenCode Go, Codex, and Claude Code.">
+  <meta name="twitter:image" content="https://agentbar.fyi/agentbar-hud-glass.png">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('agentbar.theme') || 'system';
+        document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <section class="stage" aria-label="Interactive AgentBar macOS HUD">
+    <!-- Subtle macOS-style menu bar -->
+    <header class="menubar">
+      <div class="menubar-left">
+        <a href="#top" class="brand">
+          <svg class="brand-icon" viewBox="0 0 242.705 242.705" aria-hidden="true">
+            <path transform="translate(15.451, 50.467)" fill="currentColor" fill-rule="evenodd" d="M29.038 28.529C29.038 12.773 41.811 0 57.567 0L154.236 0C169.992 0 182.765 12.773 182.765 28.529L182.765 113.242C182.765 128.998 169.992 141.771 154.236 141.771L57.567 141.771C41.811 141.771 29.038 128.998 29.038 113.242L29.038 28.529ZM0 55.513C0 49.381 4.971 44.41 11.103 44.41C11.39 44.41 11.675 44.421 11.957 44.443L11.957 44.41L22.205 44.41L22.205 109.318L11.957 109.318L11.957 109.285C11.675 109.307 11.39 109.318 11.103 109.318C4.971 109.318 0 104.347 0 98.215L0 55.513ZM189.598 55.513L189.598 44.41L199.846 44.41L199.846 44.443C200.128 44.421 200.413 44.41 200.7 44.41C206.832 44.41 211.803 49.381 211.803 55.513L211.803 98.215C211.803 104.347 206.832 109.318 200.7 109.318C200.413 109.318 200.128 109.307 199.846 109.285L199.846 109.318L189.598 109.318L189.598 55.513ZM75.156 44.41C65.722 44.41 58.075 52.058 58.075 61.491C58.075 70.925 65.722 78.572 75.156 78.572C84.589 78.572 92.237 70.925 92.237 61.491C92.237 52.058 84.589 44.41 75.156 44.41ZM136.647 44.41C127.214 44.41 119.566 52.058 119.566 61.491C119.566 70.925 127.214 78.572 136.647 78.572C146.081 78.572 153.728 70.925 153.728 61.491C153.728 52.058 146.081 44.41 136.647 44.41Z"/>
+          </svg>
+          <span>AgentBar</span>
+        </a>
+        <nav class="menubar-nav" aria-label="Links">
+          <a href="#details">How it works</a>
+          <a href="https://mauriciowolff.com/blog/agentbar">Story</a>
+        </nav>
+      </div>
+      <div class="menubar-right">
+        <div class="theme-switch" role="group" aria-label="Theme">
+          <button type="button" data-theme-set="system">System</button>
+          <button type="button" data-theme-set="mocha">Mocha</button>
+          <button type="button" data-theme-set="latte">Latte</button>
+        </div>
+        <div class="mac-tray">
+          <a href="https://github.com/bitbonsai/agentbar" class="menubar-icon-link" title="GitHub" aria-label="GitHub">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+              <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56 0-.28-.01-1.02-.02-2-3.2.7-3.88-1.54-3.88-1.54-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.47.11-3.06 0 0 .97-.31 3.18 1.18a11.04 11.04 0 0 1 5.79 0c2.21-1.49 3.18-1.18 3.18-1.18.63 1.59.23 2.77.11 3.06.74.81 1.19 1.83 1.19 3.09 0 4.42-2.69 5.4-5.26 5.68.41.36.78 1.07.78 2.15 0 1.55-.01 2.8-.01 3.18 0 .31.21.68.8.56A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/>
+            </svg>
+          </a>
+          <button type="button" class="menubar-toggle is-active" id="menubarToggle" title="Toggle HUD (⌥⇧A)" aria-label="Toggle HUD">
+            <svg viewBox="0 0 242.705 242.705" width="17" height="17" aria-hidden="true">
+              <path transform="translate(15.451, 50.467)" fill="currentColor" fill-rule="evenodd" d="M29.038 28.529C29.038 12.773 41.811 0 57.567 0L154.236 0C169.992 0 182.765 12.773 182.765 28.529L182.765 113.242C182.765 128.998 169.992 141.771 154.236 141.771L57.567 141.771C41.811 141.771 29.038 128.998 29.038 113.242L29.038 28.529ZM0 55.513C0 49.381 4.971 44.41 11.103 44.41C11.39 44.41 11.675 44.421 11.957 44.443L11.957 44.41L22.205 44.41L22.205 109.318L11.957 109.318L11.957 109.285C11.675 109.307 11.39 109.318 11.103 109.318C4.971 109.318 0 104.347 0 98.215L0 55.513ZM189.598 55.513L189.598 44.41L199.846 44.41L199.846 44.443C200.128 44.421 200.413 44.41 200.7 44.41C206.832 44.41 211.803 49.381 211.803 55.513L211.803 98.215C211.803 104.347 206.832 109.318 200.7 109.318C200.413 109.318 200.128 109.307 199.846 109.285L199.846 109.318L189.598 109.318L189.598 55.513ZM75.156 44.41C65.722 44.41 58.075 52.058 58.075 61.491C58.075 70.925 65.722 78.572 75.156 78.572C84.589 78.572 92.237 70.925 92.237 61.491C92.237 52.058 84.589 44.41 75.156 44.41ZM136.647 44.41C127.214 44.41 119.566 52.058 119.566 61.491C119.566 70.925 127.214 78.572 136.647 78.572C146.081 78.572 153.728 70.925 153.728 61.491C153.728 52.058 146.081 44.41 136.647 44.41Z"/>
+            </svg>
+          </button>
+          <span class="mac-sys-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 14" width="21" height="12" fill="none">
+              <rect x="0.75" y="1" width="19.5" height="12" rx="3" stroke="currentColor" stroke-width="1.4"/>
+              <rect x="2.8" y="3.1" width="13.5" height="7.8" rx="1.4" fill="currentColor"/>
+              <path d="M21.8 4.8v4.4a1.6 1.6 0 0 0 0-4.4Z" fill="currentColor"/>
+            </svg>
+          </span>
+          <span class="mac-sys-icon" aria-hidden="true">
+            <svg viewBox="0 0 20 16" width="16" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+              <path d="M2 5.8a11.5 11.5 0 0 1 16 0"/>
+              <path d="M5.2 9.1a7 7 0 0 1 9.6 0"/>
+              <circle cx="10" cy="12.6" r="1.25" fill="currentColor" stroke="none"/>
+            </svg>
+          </span>
+          <span class="mac-sys-icon" aria-hidden="true">
+            <svg viewBox="0 0 18 16" width="15" height="14" fill="none">
+              <rect x="1" y="1.5" width="16" height="5.5" rx="2.75" stroke="currentColor" stroke-width="1.35"/>
+              <circle cx="4.2" cy="4.25" r="1.7" fill="currentColor"/>
+              <rect x="1" y="9" width="16" height="5.5" rx="2.75" fill="currentColor" fill-opacity="0.22" stroke="currentColor" stroke-width="1.35"/>
+              <circle cx="13.8" cy="11.75" r="1.7" fill="currentColor"/>
+            </svg>
+          </span>
+          <span class="menubar-clock" id="menubarClock"></span>
+        </div>
+      </div>
+    </header>
+
+    <div class="stage-inner" id="top">
+      <!-- Live interactive HUD centerpiece -->
+      <div class="hud-slot">
+        <div class="hud" id="liveHud" role="region" aria-label="Live interactive AgentBar HUD">
+          <div class="hud-header">
+            <div class="hud-title-wrap">
+              <svg class="hud-logo" viewBox="0 0 242.705 242.705" aria-hidden="true">
+                <path transform="translate(15.451, 50.467)" fill="currentColor" fill-rule="evenodd" d="M29.038 28.529C29.038 12.773 41.811 0 57.567 0L154.236 0C169.992 0 182.765 12.773 182.765 28.529L182.765 113.242C182.765 128.998 169.992 141.771 154.236 141.771L57.567 141.771C41.811 141.771 29.038 128.998 29.038 113.242L29.038 28.529ZM0 55.513C0 49.381 4.971 44.41 11.103 44.41C11.39 44.41 11.675 44.421 11.957 44.443L11.957 44.41L22.205 44.41L22.205 109.318L11.957 109.318L11.957 109.285C11.675 109.307 11.39 109.318 11.103 109.318C4.971 109.318 0 104.347 0 98.215L0 55.513ZM189.598 55.513L189.598 44.41L199.846 44.41L199.846 44.443C200.128 44.421 200.413 44.41 200.7 44.41C206.832 44.41 211.803 49.381 211.803 55.513L211.803 98.215C211.803 104.347 206.832 109.318 200.7 109.318C200.413 109.318 200.128 109.307 199.846 109.285L199.846 109.318L189.598 109.318L189.598 55.513ZM75.156 44.41C65.722 44.41 58.075 52.058 58.075 61.491C58.075 70.925 65.722 78.572 75.156 78.572C84.589 78.572 92.237 70.925 92.237 61.491C92.237 52.058 84.589 44.41 75.156 44.41ZM136.647 44.41C127.214 44.41 119.566 52.058 119.566 61.491C119.566 70.925 127.214 78.572 136.647 78.572C146.081 78.572 153.728 70.925 153.728 61.491C153.728 52.058 146.081 44.41 136.647 44.41Z"/>
+              </svg>
+              <div>
+                <div class="hud-title">Agents</div>
+                <div class="hud-sub" id="hudStatus">Updated now</div>
+              </div>
+            </div>
+            <div class="hud-actions">
+              <button type="button" class="hud-icon-btn" id="hudRefresh" title="Refresh quota (⌘R)" aria-label="Refresh">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>
+              </button>
+              <button type="button" class="hud-icon-btn" id="hudThemeCycle" title="Cycle theme (System / Mocha / Latte)" aria-label="Cycle theme">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="9" cy="6" r="2" fill="currentColor"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="15" cy="12" r="2" fill="currentColor"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="11" cy="18" r="2" fill="currentColor"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="hud-cards">
+            <!-- Antigravity (expanded) -->
+            <div class="p-card" data-provider="antigravity">
+              <div class="p-head">
+                <button type="button" class="p-toggle" aria-expanded="true">
+                  <img src="./icons/antigravity.png" alt="" class="p-icon" width="17" height="17">
+                  <span class="p-meta">
+                    <span class="p-name">Antigravity <span class="chev">⌄</span></span>
+                    <span class="p-sub">Pro plan</span>
+                  </span>
+                </button>
+                <span class="p-cli" title="Opens agy in terminal">&gt;_</span>
+              </div>
+              <div class="p-pills">
+                <span class="pill"><i class="dot warn"></i>Neon <strong>35%</strong></span>
+                <span class="pill"><i class="dot warn"></i>Claude <strong>46%</strong></span>
+                <span class="pill"><i class="dot ok"></i>Argon <strong>100%</strong></span>
+              </div>
+              <div class="p-body">
+                <div class="g-block">
+                  <div class="g-head"><span>GEMINI 4 NEON</span> <span class="g-sub">Hydrogen · Flash</span></div>
+                  <div class="q-row" title="81% left · 8% of 5h window remaining (under pace)">
+                    <span class="q-lbl">5h</span>
+                    <div class="q-bar"><div class="q-fill ok" style="--w:81%"></div><div class="q-tick on-fill" style="--x:8%"></div></div>
+                    <span class="q-pct ok">81%</span>
+                    <span class="q-rst">24m</span>
+                  </div>
+                  <div class="q-row" title="35% left · 85% of week remaining (burning faster than pace)">
+                    <span class="q-lbl">Weekly</span>
+                    <div class="q-bar"><div class="q-fill warn" style="--w:35%"></div><div class="q-tick on-track" style="--x:85%"></div></div>
+                    <span class="q-pct warn">35%</span>
+                    <span class="q-rst">5d 22h</span>
+                  </div>
+                </div>
+                <div class="g-block">
+                  <div class="g-head"><span>CLAUDE OPUS 5.5</span> <span class="g-sub">Sonnet 5.5 · GPT-OSS</span></div>
+                  <div class="q-row">
+                    <span class="q-lbl">5h</span>
+                    <div class="q-bar"><div class="q-fill ok" style="--w:100%"></div></div>
+                    <span class="q-pct ok">100%</span>
+                    <span class="q-rst">Ready</span>
+                  </div>
+                  <div class="q-row" title="46% left · 94% of week remaining">
+                    <span class="q-lbl">Weekly</span>
+                    <div class="q-bar"><div class="q-fill warn" style="--w:46%"></div><div class="q-tick on-track" style="--x:94%"></div></div>
+                    <span class="q-pct warn">46%</span>
+                    <span class="q-rst">6d 14h</span>
+                  </div>
+                </div>
+                <div class="g-block">
+                  <div class="g-head"><span>GEMINI 4 ARGON</span></div>
+                  <div class="q-row">
+                    <span class="q-lbl">Weekly</span>
+                    <div class="q-bar"><div class="q-fill ok" style="--w:100%"></div></div>
+                    <span class="q-pct ok">100%</span>
+                    <span class="q-rst">Ready</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- OpenCode Go (auto-collapsed because > 50%) -->
+            <div class="p-card is-collapsed" data-provider="opencode">
+              <div class="p-head">
+                <button type="button" class="p-toggle" aria-expanded="false">
+                  <img src="./icons/opencode.png" alt="" class="p-icon mono-icon" width="17" height="17">
+                  <span class="p-meta">
+                    <span class="p-name">OpenCode Go <span class="chev">›</span></span>
+                    <span class="p-sub">Default</span>
+                  </span>
+                </button>
+                <span class="p-cli" title="Opens opencode in terminal">&gt;_</span>
+              </div>
+              <div class="p-pills">
+                <span class="pill"><i class="dot ok"></i>OpenCode <strong>98%</strong></span>
+              </div>
+              <div class="p-body">
+                <div class="g-block">
+                  <div class="q-row">
+                    <span class="q-lbl">5h</span>
+                    <div class="q-bar"><div class="q-fill ok" style="--w:98%"></div><div class="q-tick on-fill" style="--x:72%"></div></div>
+                    <span class="q-pct ok">98%</span>
+                    <span class="q-rst">3h 36m</span>
+                  </div>
+                  <div class="q-row">
+                    <span class="q-lbl">Weekly</span>
+                    <div class="q-bar"><div class="q-fill ok" style="--w:99%"></div><div class="q-tick on-fill" style="--x:40%"></div></div>
+                    <span class="q-pct ok">99%</span>
+                    <span class="q-rst">2d 19h</span>
+                  </div>
+                  <div class="q-row">
+                    <span class="q-lbl">Monthly</span>
+                    <div class="q-bar"><div class="q-fill ok" style="--w:100%"></div></div>
+                    <span class="q-pct ok">100%</span>
+                    <span class="q-rst">26d</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Codex (auto-expanded because < 50%) -->
+            <div class="p-card" data-provider="codex">
+              <div class="p-head">
+                <button type="button" class="p-toggle" aria-expanded="true">
+                  <img src="./icons/codex.png" alt="" class="p-icon mono-icon" width="17" height="17">
+                  <span class="p-meta">
+                    <span class="p-name">Codex <span class="chev">⌄</span></span>
+                    <span class="p-sub">Plus</span>
+                  </span>
+                </button>
+                <span class="p-cli" title="Opens codex in terminal">&gt;_</span>
+              </div>
+              <div class="p-pills">
+                <span class="pill"><i class="dot crit"></i>Codex <strong>11%</strong></span>
+              </div>
+              <div class="p-body">
+                <div class="g-block">
+                  <div class="q-row" title="11% left · 9% of week remaining">
+                    <span class="q-lbl">Weekly</span>
+                    <div class="q-bar"><div class="q-fill crit" style="--w:11%"></div><div class="q-tick on-fill" style="--x:9%"></div></div>
+                    <span class="q-pct crit">11%</span>
+                    <span class="q-rst">15h 28m</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="summon-hint" id="summonHint" hidden>
+          Press <kbd>⌥⇧A</kbd> or click to summon AgentBar
+        </button>
+      </div>
+
+      <!-- Crisp hero headline + download right below the live HUD -->
+      <div class="hero-copy">
+        <h1>Live AI quota HUD for macOS.</h1>
+        <p class="lead">
+          Antigravity, OpenCode Go, Codex, and Claude Code in one floating panel.
+          Press <kbd>⌥⇧A</kbd> to toggle it here.
+        </p>
+        <div class="cta-row">
+          <a class="btn primary" href="https://github.com/bitbonsai/agentbar/releases/latest">
+            Download v1.0.0
+          </a>
+          <a class="btn secondary" href="https://github.com/bitbonsai/agentbar">
+            GitHub
+          </a>
+        </div>
+        <p class="meta">Signed &amp; notarized · macOS 13+ · Local SQLite · MIT</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- One tight, grounded section below the fold -->
+  <main class="details" id="details">
+    <section class="block">
+      <h2>Providers</h2>
+      <p class="block-lead">Read locally from the CLIs you already use. No proxies, no accounts, missing tools are skipped.</p>
+      <div class="providers-grid">
+        <div class="prov">
+          <img src="./icons/antigravity.png" alt="" width="20" height="20">
+          <div>
+            <strong>Antigravity</strong>
+            <span>Runs <code>agy /usage</code> in a local PTY for Gemini 4 Neon, Claude Opus 5.5, and Argon.</span>
+          </div>
+        </div>
+        <div class="prov">
+          <img src="./icons/opencode.png" alt="" class="mono-icon" width="20" height="20">
+          <div>
+            <strong>OpenCode Go</strong>
+            <span>Queries <code>opencode api</code> for 5h, weekly, and monthly limits.</span>
+          </div>
+        </div>
+        <div class="prov">
+          <img src="./icons/codex.png" alt="" class="mono-icon" width="20" height="20">
+          <div>
+            <strong>Codex</strong>
+            <span>Reads the latest <code>rate_limits</code> entry in <code>~/.codex/sessions</code>.</span>
+          </div>
+        </div>
+        <div class="prov">
+          <img src="./icons/claude.png" alt="" width="20" height="20">
+          <div>
+            <strong>Claude Code</strong>
+            <span>Runs <code>claude /usage</code> for Pro and Max plan windows.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Details</h2>
+      <ul class="notes">
+        <li><strong>Pace markers.</strong> The vertical tick on each bar shows how much time is left in the window. If the bar is behind the tick, you are burning faster than a steady pace.</li>
+        <li><strong>Auto-expand.</strong> Providers above 50% stay collapsed to a single pill. Anything under 50% expands automatically.</li>
+        <li><strong>SQLite history.</strong> Every refresh appends to <code>~/Library/Application Support/agentbar/history.db</code> so you can query your own usage.</li>
+      </ul>
+      <div class="code-box">
+        <pre><code id="sqlSnippet">sqlite3 "$HOME/Library/Application Support/agentbar/history.db" \
+  "SELECT recorded_at, provider_id, window_id, round(remaining_pct, 1) FROM quota_samples ORDER BY id DESC LIMIT 10;"</code></pre>
+        <button type="button" class="copy-btn" data-copy="#sqlSnippet">Copy</button>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="footer-links">
+        <a href="https://github.com/bitbonsai/agentbar">GitHub</a>
+        <a href="https://github.com/bitbonsai/agentbar/releases">Releases</a>
+        <a href="https://mauriciowolff.com/blog/agentbar">Blog post</a>
+        <a href="https://github.com/bitbonsai/agentbar/blob/main/LICENSE">MIT</a>
+      </div>
+      <span class="copyright">© 2026 Mauricio Wolff</span>
+    </footer>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
