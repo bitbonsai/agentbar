@@ -183,7 +183,6 @@ html, body {
   background: var(--stage-bg);
   display: flex;
   flex-direction: column;
-  border-bottom: 1px solid var(--border);
 }
 
 .menubar {
