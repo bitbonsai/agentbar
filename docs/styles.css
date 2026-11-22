@@ -884,6 +884,16 @@ code {
 
 .footer-links a:hover { color: var(--fg); }
 
+.copyright a { color: var(--fg); text-decoration: none; }
+.copyright a:hover { text-decoration: underline; }
+
+/* Footer heart, copied from slirc.org: a slow beat while the footer is hovered. */
+.heart { display: inline-block; width: 1em; height: 1em; vertical-align: -.15em; fill: none; stroke: #f38ba8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transform-origin: 50% 55%; }
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes heartbeat { 0%, 100% { scale: 1; } 14% { scale: 1.14; } 28% { scale: 1; } 42% { scale: 1.08; } 56% { scale: 1; } }
+  .footer:hover .heart { animation: heartbeat 1.8s ease-in-out infinite; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
