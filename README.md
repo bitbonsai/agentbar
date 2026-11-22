@@ -4,6 +4,10 @@ A Raycast-style floating HUD for macOS that shows how much AI coding quota you
 have left. One card per provider: **Antigravity**, **OpenCode Go**, **Codex**,
 and **Claude Code**.
 
+<p align="center">
+  <img src="docs/screenshot.png" alt="AgentBar macOS HUD" width="440" />
+</p>
+
 Press `⌥⇧A` anywhere and the panel fades in at the top of the screen with the
 remaining percentages, reset countdowns, and a pace marker on every bar. Press
 `Esc` to dismiss.
