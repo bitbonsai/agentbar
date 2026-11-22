@@ -779,6 +779,14 @@ code {
   font-size: 0.9em;
 }
 
+:not(pre) > code {
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+
 .notes {
   list-style: none;
   padding: 0;
