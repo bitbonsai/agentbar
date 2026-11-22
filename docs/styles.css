@@ -689,6 +689,7 @@ kbd {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   height: 40px;
   padding: 0 18px;
   border-radius: 9px;
