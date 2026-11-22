@@ -25,7 +25,7 @@
       } catch (e) {}
     })();
   </script>
-  <link rel="stylesheet" href="./styles.css?v=2">
+  <link rel="stylesheet" href="./styles.css?v=3">
 </head>
 <body>
   <section class="stage" aria-label="Interactive AgentBar macOS HUD">
@@ -310,6 +310,7 @@
         <li><strong>Pace markers.</strong> The vertical tick on each bar shows how much time is left in the window. If the bar is behind the tick, you are burning faster than a steady pace.</li>
         <li><strong>Auto-expand.</strong> Providers above 50% stay collapsed to a single pill. Anything under 50% expands automatically.</li>
         <li><strong>SQLite history.</strong> Every refresh appends to <code>~/Library/Application Support/agentbar/history.db</code> so you can query your own usage.</li>
+        <li><strong>Inspired by.</strong> The layout and pace markers come from <a href="https://omarchy.org" target="_blank" rel="noopener noreferrer">Omarchy</a>'s Agents panel on Linux, the floating panel from <a href="https://www.raycast.com" target="_blank" rel="noopener noreferrer">Raycast</a>'s HUD, and the extra themes from <a href="https://catppuccin.com" target="_blank" rel="noopener noreferrer">Catppuccin</a> Mocha and Latte.</li>
       </ul>
       <div class="code-box">
         <pre><code id="sqlSnippet"><span class="syn-fn">sqlite3</span> <span class="syn-str">"$HOME/Library/Application Support/agentbar/history.db"</span> "

@@ -748,9 +748,10 @@ kbd {
 
 .block h2 {
   margin: 0;
-  font-size: 1.35rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
 }
 
 .block-lead {
@@ -815,6 +816,8 @@ code {
 }
 
 .notes strong { color: var(--fg); font-weight: 600; }
+.notes a { color: var(--fg); text-decoration: underline; text-decoration-color: var(--border); text-underline-offset: 3px; }
+.notes a:hover { text-decoration-color: currentColor; }
 
 .code-box {
   margin-top: 28px;
