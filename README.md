@@ -5,7 +5,7 @@ have left. One card per provider: **Antigravity**, **OpenCode Go**, **Codex**,
 and **Claude Code**.
 
 <p align="center">
-  <img src="docs/agentbar-hud.png" alt="AgentBar macOS HUD" width="440" />
+  <img src="docs/agentbar-hud-glass.png" alt="AgentBar macOS HUD" width="440" />
 </p>
 
 Press `⌥⇧A` anywhere and the panel fades in at the top of the screen with the
