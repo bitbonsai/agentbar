@@ -13,7 +13,7 @@ APP="$ROOT/dist/AgentBar.app"
 VERSION=""
 NOTARIZE=0
 PUBLISH=0
-PROFILE="${NOTARY_PROFILE:-}"
+PROFILE="${NOTARY_PROFILE:-slirc-notary}"
 IDENTITY="${CODESIGN_IDENTITY:-Developer ID Application: Mauricio Da Cunha Wolff (HX4V85BM62)}"
 
 usage() {
