@@ -24,6 +24,17 @@ enum IconLoader {
         return img
     }
 
+    static func namedTemplateImage(_ name: String) -> NSImage? {
+        for ext in ["png", "svg"] {
+            if let url = Bundle.main.url(forResource: name, withExtension: ext),
+               let img = NSImage(contentsOf: url) {
+                img.isTemplate = true
+                return img
+            }
+        }
+        return nil
+    }
+
     static func providerImage(id: String) -> NSImage? {
         let slug = id.lowercased()
         if let url = Bundle.main.url(forResource: slug, withExtension: "png", subdirectory: "providers") {

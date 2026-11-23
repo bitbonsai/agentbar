@@ -32,18 +32,24 @@ const (
 
 var errNotSignedIn = errors.New("agy is not signed in")
 
-// FindBinary returns the agy path from $PATH or ~/.local/bin.
+// FindBinary returns the agy path from $PATH or standard install directories.
 func FindBinary() (string, error) {
 	if p, err := exec.LookPath("agy"); err == nil {
 		return p, nil
 	}
+	candidates := []string{
+		"/opt/homebrew/bin/agy",
+		"/usr/local/bin/agy",
+	}
 	if home, err := os.UserHomeDir(); err == nil {
-		candidate := filepath.Join(home, ".local", "bin", "agy")
+		candidates = append([]string{filepath.Join(home, ".local", "bin", "agy")}, candidates...)
+	}
+	for _, candidate := range candidates {
 		if st, err := os.Stat(candidate); err == nil && !st.IsDir() {
 			return candidate, nil
 		}
 	}
-	return "", errors.New("agy not found in $PATH or ~/.local/bin")
+	return "", errors.New("agy not found in $PATH, ~/.local/bin, /opt/homebrew/bin, or /usr/local/bin")
 }
 
 // workspace returns a dedicated, empty directory for agy to run in. Using a
@@ -61,22 +67,52 @@ func workspace() (string, error) {
 }
 
 // childEnv strips Agy/Gemini/Antigravity vars so a caller's API-key
-// experiments don't change which account the CLI reports.
+// experiments don't change which account the CLI reports, and ensures common
+// bin directories are on PATH when launched from a GUI app.
 func childEnv() []string {
-	out := make([]string, 0, len(os.Environ())+1)
+	out := make([]string, 0, len(os.Environ())+2)
+	pathVal := ""
 	for _, kv := range os.Environ() {
 		key := kv
+		val := ""
 		if i := strings.IndexByte(kv, '='); i >= 0 {
 			key = kv[:i]
+			val = kv[i+1:]
 		}
 		upper := strings.ToUpper(key)
 		if strings.HasPrefix(upper, "GEMINI_") || strings.HasPrefix(upper, "AGY_") ||
 			strings.HasPrefix(upper, "ANTIGRAVITY_") {
 			continue
 		}
+		if key == "PATH" {
+			pathVal = val
+			continue
+		}
 		out = append(out, kv)
 	}
-	return append(out, "TERM=xterm-256color")
+	return append(out, "PATH="+augmentedPath(pathVal), "TERM=xterm-256color")
+}
+
+func augmentedPath(existing string) string {
+	extra := []string{"/opt/homebrew/bin", "/usr/local/bin"}
+	if home, err := os.UserHomeDir(); err == nil {
+		extra = append(extra, filepath.Join(home, ".local", "bin"))
+	}
+	parts := []string{}
+	seen := map[string]bool{}
+	for _, p := range filepath.SplitList(existing) {
+		if p != "" && !seen[p] {
+			seen[p] = true
+			parts = append(parts, p)
+		}
+	}
+	for _, p := range extra {
+		if !seen[p] {
+			seen[p] = true
+			parts = append(parts, p)
+		}
+	}
+	return strings.Join(parts, string(os.PathListSeparator))
 }
 
 // RunUsage spawns agy, navigates to /usage, and returns the raw screen text.

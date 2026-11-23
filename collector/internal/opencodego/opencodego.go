@@ -29,18 +29,27 @@ const (
 	monthlyWindowMinutes = 30 * 24 * 60
 )
 
-// FindBinary returns the opencode path from $PATH or ~/.bun/bin.
+// FindBinary returns the opencode path from $PATH or standard install directories.
 func FindBinary() (string, error) {
 	if p, err := exec.LookPath("opencode"); err == nil {
 		return p, nil
 	}
+	candidates := []string{
+		"/opt/homebrew/bin/opencode",
+		"/usr/local/bin/opencode",
+	}
 	if home, err := os.UserHomeDir(); err == nil {
-		candidate := filepath.Join(home, ".bun", "bin", "opencode")
+		candidates = append([]string{
+			filepath.Join(home, ".bun", "bin", "opencode"),
+			filepath.Join(home, ".local", "bin", "opencode"),
+		}, candidates...)
+	}
+	for _, candidate := range candidates {
 		if st, err := os.Stat(candidate); err == nil && !st.IsDir() {
 			return candidate, nil
 		}
 	}
-	return "", errors.New("opencode not found in $PATH or ~/.bun/bin")
+	return "", errors.New("opencode not found in $PATH, ~/.bun/bin, ~/.local/bin, /opt/homebrew/bin, or /usr/local/bin")
 }
 
 // limit is one OpenCode Go quota window.

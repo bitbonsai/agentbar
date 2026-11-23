@@ -5,6 +5,7 @@ struct ContentView: View {
     @Environment(\.colorScheme) private var scheme
     @AppStorage(ThemeKind.storageKey) private var themeRaw = ThemeKind.system.rawValue
     @AppStorage(MenuBarStyle.storageKey) private var menubarStyleRaw = MenuBarStyle.iconOnly.rawValue
+    @AppStorage(HUDAttachment.storageKey) private var attachToMenuBar = HUDAttachment.defaultValue
     @AppStorage("agentbar.showEmptyProviders") private var showEmptyProviders = false
     @State private var manualCollapse: [String: Bool] = [:]
     @State private var startAtLogin = LaunchAtLogin.isEnabled
@@ -58,27 +59,18 @@ struct ContentView: View {
     private var panelBackground: some View {
         Group {
             if theme.isSystem {
-                Color.clear
+                (scheme == .dark ? Color.black.opacity(0.14) : Color.white.opacity(0.12))
             } else {
                 // Keep themed glass translucent so the NSVisualEffectView blur shines through.
-                palette.background.opacity(scheme == .dark ? 0.38 : 0.48)
+                palette.background.opacity(scheme == .dark ? 0.55 : 0.62)
             }
         }
     }
 
     private var hairlineBorder: some View {
-        ZStack(alignment: .top) {
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .strokeBorder(palette.text.opacity(0.12), lineWidth: 1)
-            LinearGradient(
-                colors: [Color.white.opacity(0.16), Color.white.opacity(0)],
-                startPoint: .leading,
-                endPoint: .trailing
-            )
-            .frame(height: 1)
-            .padding(.horizontal, 16)
-        }
-        .allowsHitTesting(false)
+        RoundedRectangle(cornerRadius: 14, style: .continuous)
+            .strokeBorder(palette.text.opacity(scheme == .dark ? 0.1 : 0.08), lineWidth: 0.75)
+            .allowsHitTesting(false)
     }
 
     // MARK: - Header
@@ -134,26 +126,28 @@ struct ContentView: View {
 
     private var refreshButton: some View {
         Button { model.refresh(force: true) } label: {
-            Image(systemName: "arrow.clockwise")
-                .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(model.isRefreshing ? palette.accent : palette.muted)
-                .frame(width: 22, height: 22)
-                .rotationEffect(.degrees(model.isRefreshing ? 360 : 0))
-                .animation(
-                    model.isRefreshing
-                        ? .linear(duration: 0.9).repeatForever(autoreverses: false)
-                        : .easeOut(duration: 0.2),
-                    value: model.isRefreshing
-                )
-                .contentShape(Rectangle())
+            Group {
+                if model.isRefreshing {
+                    ProgressView()
+                        .controlSize(.mini)
+                } else {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(palette.muted)
+                }
+            }
+            .frame(width: 22, height: 22)
+            .contentShape(Rectangle())
         }
+        .disabled(model.isRefreshing)
         .buttonStyle(HoverButtonStyle(palette: palette, radius: 6, horizontal: 0, vertical: 0))
         .help("Refresh quota (⌘R)")
     }
 
     private var settingsMenu: some View {
         Menu {
-            Button("Check for Updates…") { UpdateChecker.checkForUpdates() }
+            Button("About AgentBar") { AboutWindowController.shared.show() }
+            Button("Check for Updates…") { SparkleUpdater.shared.checkForUpdates() }
             Toggle("Start at Login", isOn: Binding(
                 get: { startAtLogin },
                 set: { newValue in
@@ -175,6 +169,7 @@ struct ContentView: View {
                 }
             }
             .pickerStyle(.inline)
+            Toggle("Attach to menubar", isOn: $attachToMenuBar)
             Divider()
             Toggle("Show providers without limits", isOn: $showEmptyProviders)
             Divider()
@@ -276,13 +271,15 @@ struct ContentView: View {
         }
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(palette.text.opacity(0.045))
+                .fill(scheme == .dark ? Color.black.opacity(0.26) : Color.white.opacity(0.62))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .strokeBorder(palette.text.opacity(0.07), lineWidth: 1)
+                .strokeBorder(
+                    scheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.05),
+                    lineWidth: 0.75
+                )
         )
-        .animation(.easeInOut(duration: 0.16), value: isCollapsed)
     }
 
     private func isMonochromeProviderIcon(_ id: String) -> Bool {
@@ -379,7 +376,7 @@ struct ContentView: View {
                     .padding(.horizontal, 7)
                     .padding(.vertical, 3)
                     .background(
-                        Capsule().fill(palette.text.opacity(0.05))
+                        Capsule().fill(scheme == .dark ? Color.white.opacity(0.08) : Color.black.opacity(0.05))
                     )
                 }
             }

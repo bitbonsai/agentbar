@@ -112,4 +112,15 @@
       });
     });
   });
+
+  // Recent updates collapsible card
+  var updatesCard = document.getElementById('updatesCard');
+  var updatesToggle = document.getElementById('updatesToggle');
+  if (updatesCard && updatesToggle) {
+    updatesToggle.addEventListener('click', function () {
+      var expanded = updatesCard.classList.toggle('is-expanded');
+      updatesToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      updatesToggle.setAttribute('aria-label', expanded ? 'Collapse updates' : 'Expand updates');
+    });
+  }
 })();

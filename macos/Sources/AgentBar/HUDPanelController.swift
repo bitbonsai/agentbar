@@ -34,6 +34,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var cancellables = Set<AnyCancellable>()
     private var menuTracking = false
     private var lastOutsideClick: Date?
+    private var lastAnchoredState: Bool?
     /// Read from the nonisolated key monitor, written on the main actor only.
     nonisolated(unsafe) private var hudAcceptsKeys = false
 
@@ -50,6 +51,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         observeModel()
         observeDefaults()
         observeMenus()
+        SparkleUpdater.shared.start()
         Task { @MainActor in self.showHUD() }
     }
 
@@ -72,7 +74,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let size = NSSize(width: Self.panelWidth, height: 340)
         let panel = HUDWindow(
             contentRect: NSRect(origin: .zero, size: size),
-            styleMask: [.nonactivatingPanel, .borderless, .fullSizeContentView],
+            styleMask: [.nonactivatingPanel, .borderless],
             backing: .buffered,
             defer: false
         )
@@ -89,10 +91,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         panel.titleVisibility = .hidden
         panel.delegate = self
 
-        let vibrancy = NSVisualEffectView(frame: NSRect(origin: .zero, size: size))
-        vibrancy.material = .hudWindow
+        let container = NSView(frame: NSRect(origin: .zero, size: size))
+        container.wantsLayer = true
+        container.layer?.backgroundColor = NSColor.clear.cgColor
+        container.autoresizingMask = [.width, .height]
+
+        let vibrancy = NSVisualEffectView(frame: container.bounds)
+        vibrancy.material = .popover
         vibrancy.blendingMode = .behindWindow
         vibrancy.state = .active
+        vibrancy.maskImage = Self.cornerMaskImage(radius: Self.cornerRadius)
         vibrancy.wantsLayer = true
         vibrancy.layer?.cornerRadius = Self.cornerRadius
         vibrancy.layer?.cornerCurve = .continuous
@@ -102,32 +110,114 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let hosting = NSHostingView(rootView: AnyView(ContentView().environmentObject(model)))
         hosting.frame = vibrancy.bounds
         hosting.autoresizingMask = [.width, .height]
+        hosting.wantsLayer = true
         hosting.layer?.backgroundColor = NSColor.clear.cgColor
         vibrancy.addSubview(hosting)
 
-        panel.contentView = vibrancy
+        container.addSubview(vibrancy)
+        panel.contentView = container
 
         self.panel = panel
         self.vibrancy = vibrancy
         self.hosting = hosting
     }
 
+    private static func cornerMaskImage(radius: CGFloat) -> NSImage {
+        let edge = radius * 2 + 1
+        let size = NSSize(width: edge, height: edge)
+        let image = NSImage(size: size, flipped: false) { rect in
+            let path = NSBezierPath(roundedRect: rect, xRadius: radius, yRadius: radius)
+            NSColor.black.setFill()
+            path.fill()
+            return true
+        }
+        image.capInsets = NSEdgeInsets(top: radius, left: radius, bottom: radius, right: radius)
+        image.resizingMode = .stretch
+        return image
+    }
+
     private func resizeToFit() {
-        guard let panel, let hosting else { return }
+        guard let panel, let vibrancy, let hosting, let container = panel.contentView else { return }
         hosting.frame.size.width = Self.panelWidth
-        let height = max(140, hosting.fittingSize.height)
-        hosting.frame = NSRect(x: 0, y: 0, width: Self.panelWidth, height: height)
+        hosting.layoutSubtreeIfNeeded()
+        let height = max(140, hosting.fittingSize.height.rounded(.up))
         panel.setContentSize(NSSize(width: Self.panelWidth, height: height))
+        vibrancy.frame = container.bounds
+        hosting.frame = vibrancy.bounds
+        panel.invalidateShadow()
     }
 
     private func resizeIfVisible() {
         guard let panel, panel.isVisible else { return }
+        let oldFrame = panel.frame
         resizeToFit()
-        panel.setFrameOrigin(targetOrigin(for: panel.frame.size))
+        if shouldAnchorToMenuBar() {
+            panel.setFrameOrigin(targetOrigin(for: panel.frame.size))
+        } else {
+            let screen = panel.screen ?? NSScreen.main ?? NSScreen.screens.first
+            let minY = (screen?.visibleFrame.minY ?? 0) + 8
+            let y = max(minY, (oldFrame.maxY - panel.frame.height).rounded())
+            panel.setFrameOrigin(NSPoint(x: oldFrame.origin.x, y: y))
+        }
     }
 
-    /// Upper-center of the screen holding the pointer, ~18% below the top edge.
+    private func updatePlacement() {
+        let anchored = shouldAnchorToMenuBar()
+        let modeChanged = lastAnchoredState != nil && lastAnchoredState != anchored
+        lastAnchoredState = anchored
+        panel?.isMovableByWindowBackground = !anchored
+        updateStatusItemHighlight(panel?.isVisible == true)
+        guard let panel, panel.isVisible else { return }
+        if anchored || modeChanged {
+            resizeToFit()
+            panel.setFrameOrigin(targetOrigin(for: panel.frame.size))
+        }
+    }
+
+    private func statusItemButtonRect() -> NSRect? {
+        guard currentMenuBarStyle() != .hidden,
+              let button = statusItem?.button,
+              let buttonWindow = button.window,
+              buttonWindow.frame.width > 0 else { return nil }
+        let rect = buttonWindow.convertToScreen(button.convert(button.bounds, to: nil))
+        guard let screen = NSScreen.screens.first(where: { $0.frame.intersects(rect) }),
+              rect.maxY >= screen.visibleFrame.maxY - 4 else {
+            return nil
+        }
+        return rect
+    }
+
+    private func shouldAnchorToMenuBar() -> Bool {
+        isAttachedToMenuBar() && statusItemButtonRect() != nil
+    }
+
+    private func updateStatusItemHighlight(_ visible: Bool) {
+        let shouldHighlight = visible && shouldAnchorToMenuBar()
+        DispatchQueue.main.async { [weak self] in
+            self?.statusItem?.button?.highlight(shouldHighlight)
+        }
+    }
+
+    /// Anchored below the menubar icon when attached, or upper-center of the
+    /// screen holding the pointer (~18% below the top edge) when floating.
     private func targetOrigin(for size: NSSize) -> NSPoint {
+        if isAttachedToMenuBar(), let buttonRect = statusItemButtonRect() {
+            let screen = NSScreen.screens.first { $0.frame.intersects(buttonRect) }
+                ?? NSScreen.main
+                ?? NSScreen.screens.first
+            if let visible = screen?.visibleFrame {
+                let margin: CGFloat = 8
+                let gap: CGFloat = 1
+                let idealX = buttonRect.minX.rounded()
+                let minX = visible.minX + margin
+                let maxX = max(minX, visible.maxX - size.width - margin)
+                let x = min(max(idealX, minX), maxX)
+                let top = min(buttonRect.minY, visible.maxY) - gap
+                let y = max(visible.minY + margin, (top - size.height).rounded())
+                return NSPoint(x: x, y: y)
+            }
+        }
+
         let mouse = NSEvent.mouseLocation
         let screen = NSScreen.screens.first { NSMouseInRect(mouse, $0.frame, false) }
             ?? NSScreen.main
@@ -154,18 +244,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         guard let panel else { return }
         applyTheme()
         updateStatusItem()
+        let anchored = shouldAnchorToMenuBar()
+        lastAnchoredState = anchored
+        panel.isMovableByWindowBackground = !anchored
         resizeToFit()
         panel.setFrameOrigin(targetOrigin(for: panel.frame.size))
         panel.alphaValue = 0
         panel.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         hudAcceptsKeys = true
+        updateStatusItemHighlight(true)
         animate(panel, showing: true)
     }
 
     func hideHUD() {
         guard let panel, panel.isVisible else { return }
         hudAcceptsKeys = false
+        updateStatusItemHighlight(false)
         animate(panel, showing: false)
     }
 
@@ -195,7 +290,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     /// Dismiss when the click that stole focus landed outside the panel. A bare
     /// resign (macOS handing activation back to the app behind us) must not close it.
     func windowDidResignKey(_ notification: Notification) {
-        guard !menuTracking else { return }
+        guard !menuTracking, !model.isRefreshing else { return }
         let clickedOutside = lastOutsideClick.map { Date().timeIntervalSince($0) < 0.8 } ?? false
         guard clickedOutside else { return }
         hideHUD()
@@ -209,6 +304,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         panel?.appearance = appearance
         vibrancy?.appearance = appearance
         hosting?.appearance = appearance
+        vibrancy?.material = .popover
         vibrancy?.needsDisplay = true
     }
 
@@ -220,6 +316,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private func currentMenuBarStyle() -> MenuBarStyle {
         let raw = UserDefaults.standard.string(forKey: MenuBarStyle.storageKey)
         return raw.flatMap(MenuBarStyle.init(rawValue:)) ?? .iconOnly
+    }
+
+    private func isAttachedToMenuBar() -> Bool {
+        UserDefaults.standard.object(forKey: HUDAttachment.storageKey) as? Bool
+            ?? HUDAttachment.defaultValue
     }
 
     // MARK: - Global hotkey (⌥⇧A), Carbon so no Accessibility grant is needed
@@ -381,6 +482,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         styleItem.submenu = styleMenu
         menu.addItem(styleItem)
 
+        let attachItem = NSMenuItem(
+            title: "Attach to menubar",
+            action: #selector(toggleAttachToMenuBar),
+            keyEquivalent: ""
+        )
+        attachItem.target = self
+        attachItem.state = isAttachedToMenuBar() ? .on : .off
+        menu.addItem(attachItem)
+
+        menu.addItem(.separator())
+
+        let about = NSMenuItem(title: "About AgentBar", action: #selector(showAboutFromMenu), keyEquivalent: "")
+        about.target = self
+        menu.addItem(about)
+
+        let updates = NSMenuItem(title: "Check for Updates…", action: #selector(checkForUpdatesFromMenu), keyEquivalent: "")
+        updates.target = self
+        menu.addItem(updates)
+
         menu.addItem(.separator())
 
         let quit = NSMenuItem(title: "Quit AgentBar", action: #selector(quitFromMenu), keyEquivalent: "q")
@@ -408,6 +528,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         guard let raw = sender.representedObject as? String else { return }
         UserDefaults.standard.set(raw, forKey: MenuBarStyle.storageKey)
         updateStatusItem()
+        updatePlacement()
+    }
+
+    @objc private func toggleAttachToMenuBar() {
+        UserDefaults.standard.set(!isAttachedToMenuBar(), forKey: HUDAttachment.storageKey)
+        updatePlacement()
+    }
+
+    @objc private func showAboutFromMenu() {
+        AboutWindowController.shared.show()
+    }
+
+    @objc private func checkForUpdatesFromMenu() {
+        SparkleUpdater.shared.checkForUpdates()
     }
 
     @objc private func quitFromMenu() {
@@ -452,6 +586,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             Task { @MainActor in
                 self?.applyTheme()
                 self?.updateStatusItem()
+                self?.updatePlacement()
             }
         })
     }
@@ -463,6 +598,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         })
         observers.append(center.addObserver(forName: NSMenu.didEndTrackingNotification, object: nil, queue: .main) { [weak self] _ in
             Task { @MainActor in self?.menuTracking = false }
+        })
+        observers.append(center.addObserver(forName: NSApplication.didResignActiveNotification, object: nil, queue: .main) { [weak self] _ in
+            Task { @MainActor in
+                guard let self, !self.menuTracking, !self.model.isRefreshing else { return }
+                self.hideHUD()
+            }
         })
     }
 }

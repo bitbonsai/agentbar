@@ -109,6 +109,7 @@ final class AgentBarModel: ObservableObject {
         let process = Process()
         process.executableURL = binary
         process.arguments = args
+        process.environment = collectorEnvironment()
         let stdout = Pipe()
         let stderr = Pipe()
         process.standardOutput = stdout
@@ -157,6 +158,25 @@ final class AgentBarModel: ObservableObject {
         candidates.append(URL(fileURLWithPath: "/opt/homebrew/bin/agentbar-collector"))
         candidates.append(URL(fileURLWithPath: "/usr/local/bin/agentbar-collector"))
         return candidates.first { FileManager.default.isExecutableFile(atPath: $0.path) }
+    }
+
+    /// GUI apps launched from Finder/Spotlight inherit a minimal PATH; append
+    /// common CLI install locations so the collector and its child CLIs work.
+    nonisolated private static func collectorEnvironment() -> [String: String] {
+        var env = ProcessInfo.processInfo.environment
+        let home = FileManager.default.homeDirectoryForCurrentUser.path
+        let extra = [
+            "/opt/homebrew/bin",
+            "/usr/local/bin",
+            "\(home)/.local/bin",
+            "\(home)/.bun/bin"
+        ]
+        var parts = (env["PATH"] ?? "").split(separator: ":").map(String.init)
+        for dir in extra where !parts.contains(dir) {
+            parts.append(dir)
+        }
+        env["PATH"] = parts.joined(separator: ":")
+        return env
     }
 }
 

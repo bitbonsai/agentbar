@@ -859,6 +859,122 @@ code {
 
 .copy-btn:hover { color: var(--fg); }
 
+/* Collapsible Recent updates card */
+.updates-card {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 18px 20px;
+}
+
+.updates-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.updates-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 15px;
+  color: var(--fg);
+}
+
+.updates-badge-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.updates-ver {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 26%, transparent);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.updates-toggle {
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, transform 0.2s ease;
+}
+
+.updates-toggle:hover {
+  color: var(--fg);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+
+.updates-card.is-expanded .updates-toggle svg {
+  transform: rotate(180deg);
+}
+
+.updates-body {
+  position: relative;
+  max-height: 116px;
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+}
+
+.updates-body::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 44px;
+  background: linear-gradient(to bottom, transparent, var(--bg));
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.updates-card.is-expanded .updates-body {
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.updates-card.is-expanded .updates-body::after {
+  opacity: 0;
+}
+
+.updates-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.updates-list strong {
+  color: var(--fg);
+  font-weight: 600;
+}
+
 .footer {
   margin-top: 84px;
   padding-top: 28px;

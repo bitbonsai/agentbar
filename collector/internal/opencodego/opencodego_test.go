@@ -15,9 +15,9 @@ const cliPayload = `{
   "data": {
     "workspace": {"id": "wrk_1", "name": "Default", "usageURL": "https://opencode.ai/console/wrk_1/activity/overview"},
     "go": {
-      "rolling": {"percent": 12.5, "limited": false, "resetsAt": 1795380538000},
-      "weekly":  {"percent": 40,   "limited": false, "resetsAt": 1795392000000},
-      "monthly": {"percent": 3,    "limited": false, "resetsAt": 1797695864000}
+      "rolling": {"percent": 12.5, "limited": false, "resetsAt": RESET_ROLLING},
+      "weekly":  {"percent": 40,   "limited": false, "resetsAt": RESET_WEEKLY},
+      "monthly": {"percent": 3,    "limited": false, "resetsAt": RESET_MONTHLY}
     },
     "budgets": []
   }
@@ -32,7 +32,16 @@ const httpPayload = `{
 }`
 
 func TestParseCLIPayload(t *testing.T) {
-	p, err := Parse([]byte(cliPayload))
+	now := time.Now()
+	payload := cliPayload
+	for placeholder, offset := range map[string]time.Duration{
+		"RESET_ROLLING": 3 * time.Hour,
+		"RESET_WEEKLY":  48 * time.Hour,
+		"RESET_MONTHLY": 480 * time.Hour,
+	} {
+		payload = strings.ReplaceAll(payload, placeholder, strconv.FormatInt(now.Add(offset).UnixMilli(), 10))
+	}
+	p, err := Parse([]byte(payload))
 	if err != nil {
 		t.Fatalf("Parse: %v", err)
 	}

@@ -6,6 +6,8 @@
 	<string>en</string>
 	<key>CFBundleExecutable</key>
 	<string>AgentBar</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
 	<string>tools.bitbonsai.agentbar</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -17,9 +19,9 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.1</string>
+	<string>1.0.2</string>
 	<key>CFBundleVersion</key>
-	<string>2</string>
+	<string>3</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>13.0</string>
 	<key>LSUIElement</key>
@@ -28,7 +30,11 @@
 	<true/>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2026 Mauricio Wolff. MIT licensed.</string>
-	<key>AgentBarUpdateRepo</key>
-	<string>bitbonsai/agentbar</string>
+	<key>SUFeedURL</key>
+	<string>https://agentbar.fyi/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>8JZT+DLrqOk6HuakFJMICauSDp7BfWDa75efxLuY+mQ=</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
 </dict>
 </plist>

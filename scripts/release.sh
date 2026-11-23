@@ -66,9 +66,25 @@ if [ ! -f "$HELPER" ]; then
   exit 1
 fi
 
-# Inside out: the nested helper first, then the bundle that contains it.
+# Inside out: nested helper and Sparkle.framework first, then the bundle.
 echo "==> codesign collector"
 codesign --force --options runtime --timestamp --sign "$IDENTITY" "$HELPER"
+
+SPARKLE="$APP/Contents/Frameworks/Sparkle.framework"
+if [ -d "$SPARKLE" ]; then
+  echo "==> codesign Sparkle.framework"
+  for item in \
+    "$SPARKLE/Versions/B/XPCServices/Installer.xpc" \
+    "$SPARKLE/Versions/B/XPCServices/Downloader.xpc" \
+    "$SPARKLE/Versions/B/Updater.app" \
+    "$SPARKLE/Versions/B/Autoupdate" \
+    "$SPARKLE"
+  do
+    if [ -e "$item" ]; then
+      codesign --force --options runtime --timestamp --sign "$IDENTITY" "$item"
+    fi
+  done
+fi
 
 echo "==> codesign app"
 codesign --force --options runtime --timestamp --sign "$IDENTITY" "$APP"
@@ -102,6 +118,42 @@ if [ "$NOTARIZE" -eq 1 ]; then
 
   echo "==> spctl"
   spctl -a -vvv -t exec "$APP"
+fi
+
+SIGN_UPDATE="$ROOT/macos/.build/artifacts/sparkle/Sparkle/bin/sign_update"
+if [ -x "$SIGN_UPDATE" ]; then
+  echo "==> sparkle sign_update + docs/appcast.xml"
+  BUILD_NUM="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$PLIST")"
+  SIG_OUT="$("$SIGN_UPDATE" --account agentbar "$ZIP")"
+  ED_SIG="$(printf '%s\n' "$SIG_OUT" | sed -n 's/.*sparkle:edSignature="\([^"]*\)".*/\1/p')"
+  ZIP_LEN="$(printf '%s\n' "$SIG_OUT" | sed -n 's/.*length="\([^"]*\)".*/\1/p')"
+  PUB_DATE="$(LC_ALL=C date -u '+%a, %d %b %Y %H:%M:%S +0000')"
+  if [ -n "$ED_SIG" ] && [ -n "$ZIP_LEN" ]; then
+    cat > "$ROOT/docs/appcast.xml" <<EOF
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>AgentBar</title>
+    <link>https://agentbar.fyi/</link>
+    <description>AgentBar updates</description>
+    <language>en</language>
+    <item>
+      <title>AgentBar $VERSION</title>
+      <pubDate>$PUB_DATE</pubDate>
+      <sparkle:version>$BUILD_NUM</sparkle:version>
+      <sparkle:shortVersionString>$VERSION</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+      <enclosure
+        url="https://github.com/bitbonsai/agentbar/releases/download/v$VERSION/AgentBar-$VERSION-macOS.zip"
+        sparkle:edSignature="$ED_SIG"
+        length="$ZIP_LEN"
+        type="application/octet-stream" />
+    </item>
+  </channel>
+</rss>
+EOF
+    echo "    updated $ROOT/docs/appcast.xml"
+  fi
 fi
 
 if [ "$PUBLISH" -eq 1 ]; then

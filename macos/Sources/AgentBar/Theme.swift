@@ -50,6 +50,11 @@ enum MenuBarStyle: String, CaseIterable, Identifiable {
     }
 }
 
+enum HUDAttachment {
+    static let storageKey = "agentbar.attachToMenuBar"
+    static let defaultValue = true
+}
+
 /// Colors resolved for the active appearance. Catppuccin follows the OS mode:
 /// Mocha in dark, Latte in light unless a variant is forced.
 struct Palette {
