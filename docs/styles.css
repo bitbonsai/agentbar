@@ -12,10 +12,10 @@
               #ebe7df;
 
   /* HUD glass (light) */
-  --hud-bg: rgba(248, 248, 250, 0.78);
-  --hud-border: rgba(20, 24, 32, 0.12);
-  --hud-card: rgba(20, 24, 32, 0.045);
-  --hud-card-border: rgba(20, 24, 32, 0.07);
+  --hud-bg: rgba(246, 246, 249, 0.86);
+  --hud-border: rgba(20, 24, 32, 0.08);
+  --hud-card: rgba(255, 255, 255, 0.62);
+  --hud-card-border: rgba(0, 0, 0, 0.05);
   --hud-fg: #161a22;
   --hud-muted: #5f6877;
   --hud-track: rgba(20, 24, 32, 0.11);
@@ -53,10 +53,10 @@
                 radial-gradient(85% 80% at 52% 96%, rgba(32, 86, 98, 0.24) 0%, transparent 60%),
                 #0a0e16;
 
-    --hud-bg: rgba(24, 27, 34, 0.72);
-    --hud-border: rgba(255, 255, 255, 0.13);
-    --hud-card: rgba(255, 255, 255, 0.045);
-    --hud-card-border: rgba(255, 255, 255, 0.075);
+    --hud-bg: rgba(36, 39, 46, 0.78);
+    --hud-border: rgba(255, 255, 255, 0.10);
+    --hud-card: rgba(0, 0, 0, 0.26);
+    --hud-card-border: rgba(255, 255, 255, 0.04);
     --hud-fg: #f1f4f9;
     --hud-muted: #929bab;
     --hud-track: rgba(255, 255, 255, 0.10);
@@ -93,10 +93,10 @@
               radial-gradient(85% 80% at 50% 96%, rgba(166, 227, 161, 0.14) 0%, transparent 60%),
               #11111b;
 
-  --hud-bg: rgba(30, 30, 46, 0.74);
-  --hud-border: rgba(205, 214, 244, 0.14);
-  --hud-card: rgba(49, 50, 68, 0.52);
-  --hud-card-border: rgba(205, 214, 244, 0.08);
+  --hud-bg: rgba(30, 30, 46, 0.80);
+  --hud-border: rgba(205, 214, 244, 0.10);
+  --hud-card: rgba(0, 0, 0, 0.26);
+  --hud-card-border: rgba(255, 255, 255, 0.04);
   --hud-fg: #cdd6f4;
   --hud-muted: #9399b2;
   --hud-track: rgba(69, 71, 90, 0.75);
@@ -132,10 +132,10 @@
               radial-gradient(90% 80% at 50% 96%, rgba(64, 160, 43, 0.10) 0%, transparent 60%),
               #e6e9ef;
 
-  --hud-bg: rgba(239, 241, 245, 0.80);
-  --hud-border: rgba(76, 79, 105, 0.14);
-  --hud-card: rgba(220, 224, 232, 0.55);
-  --hud-card-border: rgba(76, 79, 105, 0.08);
+  --hud-bg: rgba(239, 241, 245, 0.86);
+  --hud-border: rgba(76, 79, 105, 0.09);
+  --hud-card: rgba(255, 255, 255, 0.62);
+  --hud-card-border: rgba(0, 0, 0, 0.05);
   --hud-fg: #4c4f69;
   --hud-muted: #7c7f93;
   --hud-track: rgba(172, 176, 190, 0.5);
